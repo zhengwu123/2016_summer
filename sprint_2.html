@@ -9,15 +9,66 @@
       <script src="js/bootstrap.min.js"></script>
       <link href="css/bootstrap-switch.css" rel="stylesheet">
       <script src="js/bootstrap-switch.js"></script>
+      <style>
+      .ol-popup {
+        position: absolute;
+        background-color: white;
+        -webkit-filter: drop-shadow(0 1px 4px rgba(0,0,0,0.2));
+        filter: drop-shadow(0 1px 4px rgba(0,0,0,0.2));
+        padding: 15px;
+        border-radius: 10px;
+        border: 1px solid #cccccc;
+        bottom: 12px;
+        left: -50px;
+        min-width: 280px;
+      }
+      .ol-popup:after, .ol-popup:before {
+        top: 100%;
+        border: solid transparent;
+        content: " ";
+        height: 0;
+        width: 0;
+        position: absolute;
+        pointer-events: none;
+      }
+      .ol-popup:after {
+        border-top-color: white;
+        border-width: 10px;
+        left: 48px;
+        margin-left: -10px;
+      }
+      .ol-popup:before {
+        border-top-color: #cccccc;
+        border-width: 11px;
+        left: 48px;
+        margin-left: -11px;
+      }
+      .ol-popup-closer {
+        text-decoration: none;
+        position: absolute;
+        top: 2px;
+        right: 8px;
+      }
+      .ol-popup-closer:after {
+        content: "X";
+      }
+    </style>
   </head>
   <body onload ="bounceToUS()">
     <div id="map" class="map"></div>
 <input type="checkbox" name="my-checkbox" class= "switch" id = "visible" onchange= "oncheck()" checked>
-<label class="checkbox-inline"><input type="checkbox" value="">Indiana</label>
-<label class="checkbox-inline"><input type="checkbox" value="">Michigan</label>
-<label class="checkbox-inline"><input type="checkbox" value="">Ohio</label>
+<label class="checkbox-inline"><input type="checkbox" id="IN" onchange="getState('IN')">Indiana</label>
+<label class="checkbox-inline"><input type="checkbox" id="MI" onchange="getState('MI')">Michigan</label>
+<label class="checkbox-inline"><input type="checkbox" id="OH" onchange="getState('OH')">Ohio</label>
 <button type="button" class="btn btn-primary">Report</button>
+<div id="popup" class="ol-popup">
+<a href="#" id="popup-closer" class="ol-popup-closer"></a>
+<div id="popup-content"></div>
     <script>
+    //popup-window variables
+     var container = document.getElementById('popup');
+      var content = document.getElementById('popup-content');
+      var closer = document.getElementById('popup-closer');
     //initialize switch
     $("input.switch").bootstrapSwitch();
     //store longtitude and latitude information of chicago
@@ -54,7 +105,21 @@
           return style;
         }
       });
+       var format = 'image/png';
+       var tiled = new ol.layer.Tile({
+       visible: false,
+        source: new ol.source.TileWMS({
+          url: 'http://buckeye.agriculture.purdue.edu:8080/geoserver/topp/wms',
+          params: {'FORMAT': format, 
+                   'VERSION': '1.1.1',
+                   tiled: true,
+                LAYERS: 'topp:states',
+                STYLES: '',
+          }
+        })
+      });
     //set map layer
+
     var layer = new ol.layer.Tile({
             source: new ol.source.OSM()
           });
@@ -62,17 +127,27 @@
           center: [0,0],
           zoom: 2
         });
+    //over lay for pop up window
+       var overlay = new ol.Overlay(/** @type {olx.OverlayOptions} */ ({
+        element: container,
+        autoPan: true,
+        autoPanAnimation: {
+          duration: 250
+        }
+      }));
       var map = new ol.Map({
         layers: [
-          layer ,vectorLayer
+          layer,tiled,vectorLayer
         ],
         loadTilesWhileAnimating: true,
+        overlays: [overlay],
         target: 'map',
        
         view:view
       });
       //check box toggle visibility
  function oncheck(){
+  tiled.getSource().updateParams({'CQL_FILTER': ""});
    if(document.getElementById('visible').checked) {
     console.log("i am here")
     vectorLayer.setVisible(true);
@@ -104,6 +179,7 @@
         }
         return l;
       }
+
       function bounceToUS() {
         var pan = ol.animation.pan({
           duration: 2000,
@@ -114,7 +190,145 @@
         view.setCenter(chicago);
         view.setZoom(4);
       }
+        //var CGL_filter = {'CQL_FILTER': null}
+         var state_list = [];
+      function getState(state){
+       
+        //map.getLayers().forEach(function(lyr) {
+              if(state == "IN" ){
+              
+                 if(document.getElementById('IN').checked){
+                  infowindow([-86.162682, 39.768597]);
+                    state_list.push("IN");
+            tiled.setVisible(true);
+            if(state_list.length ==1){
+                    tiled.getSource().updateParams({'CQL_FILTER': "STATE_NAME IN ('Indiana')"});
+                  }
+                  else if(state_list.indexOf("OH")!=-1 && state_list.length ==2){
+            tiled.getSource().updateParams({'CQL_FILTER': "STATE_NAME IN ('Indiana','Ohio')"});
+          }
+          else if(state_list.indexOf("MI")!=-1 && state_list.length ==2){
+            tiled.getSource().updateParams({'CQL_FILTER': "STATE_NAME IN ('Indiana','Michigan')"});
+            
+          }
+          else if (state_list.length ==3){
+               tiled.getSource().updateParams({'CQL_FILTER': "STATE_NAME IN ('Indiana','Michigan','Ohio')"});
+          }
+            
+          }
+          else{
+            if(state_list.indexOf("MI")!=-1 && state_list.length ==1){
+            tiled.getSource().updateParams({'CQL_FILTER': "STATE_NAME IN ('Michigan')"});
+          }
+          else if(state_list.indexOf("OH")!=-1 && state_list.length ==1){
+            tiled.getSource().updateParams({'CQL_FILTER': "STATE_NAME IN ('Ohio')"});
+            
+          }
+          else if (state_list.length ==2){
+               tiled.getSource().updateParams({'CQL_FILTER': "STATE_NAME IN ('Michigan','Ohio')"});
+          }
+            state_list.pop("IN");
+            if(state_list.length == 0)
+            tiled.setVisible(false);
 
+          }
+      }
+              else if(state == "OH"){
+                if(document.getElementById('OH').checked){
+                  infowindow([-81.5195852,  40.787819]);
+                  state_list.push("OH");
+                  tiled.setVisible(true);
+                  if(state_list.length ==1){
+                    tiled.getSource().updateParams({'CQL_FILTER': "STATE_NAME IN ('Ohio')"});
+                  }
+                  else if(state_list.indexOf("IN")!=-1 && state_list.length ==2){
+            tiled.getSource().updateParams({'CQL_FILTER': "STATE_NAME IN ('Indiana','Ohio')"});
+          }
+          else if(state_list.indexOf("MI")!=-1 && state_list.length ==2){
+            tiled.getSource().updateParams({'CQL_FILTER': "STATE_NAME IN ('Ohio','Michigan')"});
+            
+          }
+          else if (state_list.length ==3){
+               tiled.getSource().updateParams({'CQL_FILTER': "STATE_NAME IN ('Indiana','Michigan','Ohio')"});
+          }
+        }
+           else{ 
+            state_list.pop("OH");
+           
+                 if(state_list.indexOf("IN")!=-1 && state_list.length ==1){
+            tiled.getSource().updateParams({'CQL_FILTER': "STATE_NAME IN ('Indiana')"});
+          }
+          else if(state_list.indexOf("MI")!=-1 && state_list.length ==1){
+            tiled.getSource().updateParams({'CQL_FILTER': "STATE_NAME IN ('Michigan')"});
+            
+          }
+          else if (state_list.length ==2){
+               tiled.getSource().updateParams({'CQL_FILTER': "STATE_NAME IN ('Indiana','Michigan')"});
+          }
+            if(state_list.length == 0)
+          tiled.setVisible(false);
+        
+          }
+      }
+
+
+         else if(state == "MI"){
+                if(document.getElementById('MI').checked){
+                   state_list.push("MI");
+                   infowindow([-83.045753,  42.331429]);
+            tiled.setVisible(true)
+             if(state_list.length ==1){
+                    tiled.getSource().updateParams({'CQL_FILTER': "STATE_NAME IN ('Michigan')"});
+                  }
+                  else if(state_list.indexOf("IN")!=-1 && state_list.length ==2){
+            tiled.getSource().updateParams({'CQL_FILTER': "STATE_NAME IN ('Indiana','Michigan')"});
+          }
+          else if(state_list.indexOf("OH")!=-1 && state_list.length ==2){
+            tiled.getSource().updateParams({'CQL_FILTER': "STATE_NAME IN ('Ohio','Michigan')"});
+            
+          }
+          else if (state_list.length ==3){
+               tiled.getSource().updateParams({'CQL_FILTER': "STATE_NAME IN ('Indiana','Michigan','Ohio')"});
+          }
+          }
+           else{
+            state_list.pop("MI");
+
+            if(state_list.indexOf("IN")!=-1 && state_list.length ==1){
+            tiled.getSource().updateParams({'CQL_FILTER': "STATE_NAME IN ('Indiana')"});
+          }
+          else if(state_list.indexOf("OH")!=-1 && state_list.length ==1){
+            tiled.getSource().updateParams({'CQL_FILTER': "STATE_NAME IN ('Ohio')"});
+            
+          }
+          else if (state_list.length ==2){
+               tiled.getSource().updateParams({'CQL_FILTER': "STATE_NAME IN ('Indiana','Ohio')"});
+          }
+            if(state_list.length == 0)
+              tiled.setVisible(false);
+          }
+      }
+
+        }
+        //dear with pop-up
+        closer.onclick = function() {
+        overlay.setPosition(undefined);
+        closer.blur();
+        return false;
+      };
+
+    
+
+      function infowindow(coordinate){
+        var coor = ol.proj.transform(coordinate, 'EPSG:4326', 'EPSG:3857');
+
+        var hdms = ol.coordinate.toStringHDMS(ol.proj.transform(
+            coordinate, 'EPSG:3857', 'EPSG:4326'));
+
+        content.innerHTML = '<p>Information of this state:</p><code>' + hdms +
+            '</code>';
+        overlay.setPosition(coor);
+      }
     </script>
   </body>
 </html>
