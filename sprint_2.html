@@ -9,6 +9,11 @@
       <script src="js/bootstrap.min.js"></script>
       <link href="css/bootstrap-switch.css" rel="stylesheet">
       <script src="js/bootstrap-switch.js"></script>
+      <!--Add vex link here-->
+      <script src="js/vex.combined.min.js"></script>
+      <script>vex.defaultOptions.className = 'vex-theme-os';</script>
+      <link rel="stylesheet" href="css/vex.css" />
+      <link rel="stylesheet" href="css/vex-theme-os.css" />
       <style>
       .ol-popup {
         position: absolute;
@@ -60,7 +65,7 @@
 <label class="checkbox-inline"><input type="checkbox" id="IN" onchange="getState('IN')">Indiana</label>
 <label class="checkbox-inline"><input type="checkbox" id="MI" onchange="getState('MI')">Michigan</label>
 <label class="checkbox-inline"><input type="checkbox" id="OH" onchange="getState('OH')">Ohio</label>
-<button type="button" class="btn btn-primary">Report</button>
+<button type="submit" class="btn btn-primary" value ="submit" id="fetch_data">Get Report</button>
 <div id="popup" class="ol-popup">
 <a href="#" id="popup-closer" class="ol-popup-closer"></a>
 <div id="popup-content"></div>
@@ -192,13 +197,13 @@
       }
         //var CGL_filter = {'CQL_FILTER': null}
          var state_list = [];
+         var list =[];
       function getState(state){
        
         //map.getLayers().forEach(function(lyr) {
               if(state == "IN" ){
-              
                  if(document.getElementById('IN').checked){
-                  infowindow([-86.162682, 39.768597]);
+                  infowindow([-86.162682, 39.768597],"IN");
                     state_list.push("IN");
             tiled.setVisible(true);
             if(state_list.length ==1){
@@ -235,7 +240,7 @@
       }
               else if(state == "OH"){
                 if(document.getElementById('OH').checked){
-                  infowindow([-81.5195852,  40.787819]);
+                  infowindow([-81.5195852,  40.787819],"OH");
                   state_list.push("OH");
                   tiled.setVisible(true);
                   if(state_list.length ==1){
@@ -275,7 +280,7 @@
          else if(state == "MI"){
                 if(document.getElementById('MI').checked){
                    state_list.push("MI");
-                   infowindow([-83.045753,  42.331429]);
+                   infowindow([-83.045753,  42.331429],"MI");
             tiled.setVisible(true)
              if(state_list.length ==1){
                     tiled.getSource().updateParams({'CQL_FILTER': "STATE_NAME IN ('Michigan')"});
@@ -307,10 +312,9 @@
             if(state_list.length == 0)
               tiled.setVisible(false);
           }
-      }
-
+          }
         }
-        //dear with pop-up
+        //deal with pop-up
         closer.onclick = function() {
         overlay.setPosition(undefined);
         closer.blur();
@@ -319,16 +323,90 @@
 
     
 
-      function infowindow(coordinate){
+      function infowindow(coordinate,states){
         var coor = ol.proj.transform(coordinate, 'EPSG:4326', 'EPSG:3857');
+        var state = "";
+                  if(states == "IN" ){
 
+                        state = "Indiana state";
+                  }
+                  if(states == "MI" ){
+
+                        state = "Michigan state";
+                  }
+                  if(states == "OH" ){
+
+                        state = "Ohio state";
+                  }
         var hdms = ol.coordinate.toStringHDMS(ol.proj.transform(
             coordinate, 'EPSG:3857', 'EPSG:4326'));
 
-        content.innerHTML = '<p>Information of this state:</p><code>' + hdms +
+        content.innerHTML = '<p>Information of this state:</p><code>' + state +
             '</code>';
         overlay.setPosition(coor);
       }
+        //use ajax past data to python
+        function selectCheck(state){
+
+      return document.getElementById(state).checked;
+
+
+        }
+          $(document).ready(function()
+            {
+              var states_dict = {};
+              
+                $('#fetch_data').click(function(){
+                    if ( selectCheck("IN")==true &&  selectCheck("OH")== false && selectCheck("MI")==false){
+                states_dict = {'IN':'IN'};
+              }
+              else if (selectCheck("MI")==true &&  selectCheck("OH")== false && selectCheck("IN")==false){
+
+                states_dict = {'MI':'MI'};
+              }
+             else if (selectCheck("OH")==true &&  selectCheck("IN")== false && selectCheck("MI")==false){
+
+                states_dict = {'OH':'OH'};
+              }
+               else if (selectCheck("MI")==true &&  selectCheck("IN")== true && selectCheck("OH")==false){
+
+                states_dict = {'IN':'IN','MI':'MI'};
+              }
+                else if (selectCheck("MI")==true &&  selectCheck("OH")== true && selectCheck("IN")==false){
+
+                states_dict = {'OH':'OH','MI':'MI'};
+              }
+                else if (selectCheck("IN")==true &&  selectCheck("OH")== true && selectCheck("MI")==false){
+
+                states_dict = {'IN':'IN','OH':'OH'};
+              }
+              else if  (selectCheck("MI")==true &&  selectCheck("IN")== true && selectCheck("OH")==true){
+                  states_dict = {'IN':'IN','OH':'OH','MI':'MI'};
+
+              }
+                    $.ajax({
+                        url: "fetch_data.cgi",
+                        type: "post",
+                        datatype:"json",
+                        data: states_dict,
+                        success: function(response){
+                            //alert(response['keys']);
+                            var newMessage ="<table border=\"1\">" + "<th>&nbsp;&nbsp;State&nbsp;</th>" + "<th>&nbsp;&nbsp;Population&nbsp;&nbsp;</th>" +"<th>&nbsp;&nbsp;Water(km)&nbsp;&nbsp;</th>"+"<th>&nbsp;&nbsp;Land(km)&nbsp;&nbsp;</th>"+"<th>&nbsp;&nbsp;Families&nbsp;&nbsp;</th>";
+
+                            for(i=0; i<response["totalFeatures"]; i++){
+                             newMessage += "<tr><td>"+response["features"][i]["properties"]["STATE_NAME"]+"</td><td>"+response["features"][i]["properties"]["PERSONS"]+"</td><td>"+response["features"][i]["properties"]["WATER_KM"]+"</td><td>"+parseInt(response["features"][i]["properties"]["LAND_KM"])+"</td><td>"+(response["features"][i]["properties"]["FAMILIES"])+"</td></tr>";
+
+                             }
+                             newMessage+= "</table>";
+                              //alert(message);
+                              vex.dialog.confirm({
+                              message: newMessage,
+                                    });
+
+                        }
+                    });
+                });
+            });
     </script>
   </body>
 </html>
