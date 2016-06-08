@@ -82,7 +82,7 @@ fetching ESRI data
 
 http://openlayers.org/en/latest/examples/vector-esri.html
 we currently do not use ESRI formated data, but we might add it.
-2.sprint 2 
+#Sprint 2
 Sprint 2 Summer 2016
 For the second sprint in the summer session, we will learn Python and bring together things you worked on in the first sprint. You will use HTML, JavaScript, mapping API’s and Python.
 So from today, May 31 until June 8, you should learn Python using the resources I sent out or discover better for yourself. I suggest a holistic approach but I have a specific task set. 
@@ -95,5 +95,5 @@ Button two on your page runs a python script to do a CQL query to fetch the stat
 Button three on your page runs a python script to do a CQL query to fetch the state where STATE_NAME = “Ohio”. It should display on map and have a checkbox to turn on and off. This layer should have a pop-up enabled.
 Button Four reports the state of the button 1-3 checkboxes to a Python script. In other words, the user is making a selection of a subset of the three states using the checkboxes and you need to pass to a script the choices the user made, using a list of the selected states but not the unselected states, at any time when the user hits button 4 to run the “select and export list” script. When the user hits button 4, your Python script is fired. 
 You need to write a Python script that will fire from the button and print or display the selected state names. That is a mock-up of selecting input from the map page and sending It to the Python model scripts. So you will need to learn how to make Apache read as cgi and execute Python on the server in the mapserve account. You need to make .py change to .cgi and use this line at the top:
-#!/usr/local/bin/python. 
+# sprint 2 finished
 
