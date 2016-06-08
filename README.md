@@ -1,6 +1,6 @@
 # 2016_summer intern GIS
 
-1.sprint 1 learn openlayer API and do some exaple practices
+# sprint 1 learn openlayer API and do some exaple practices
 Process - copy some of the [http://openlayers.org/en/latest/examples/tutorials] to your
 
 buckeye drive, get them to work. Then improve them with our local data.
@@ -82,6 +82,8 @@ fetching ESRI data
 
 http://openlayers.org/en/latest/examples/vector-esri.html
 we currently do not use ESRI formated data, but we might add it.
+# sprint 1 end
+
 #Sprint 2
 Sprint 2 Summer 2016
 For the second sprint in the summer session, we will learn Python and bring together things you worked on in the first sprint. You will use HTML, JavaScript, mapping API’s and Python.
