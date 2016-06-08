@@ -84,8 +84,8 @@ http://openlayers.org/en/latest/examples/vector-esri.html
 we currently do not use ESRI formated data, but we might add it.
 # sprint 1 end
 
-#Sprint 2
-Sprint 2 Summer 2016
+#Sprint 2 start
+
 For the second sprint in the summer session, we will learn Python and bring together things you worked on in the first sprint. You will use HTML, JavaScript, mapping API’s and Python.
 So from today, May 31 until June 8, you should learn Python using the resources I sent out or discover better for yourself. I suggest a holistic approach but I have a specific task set. 
 Here is the task. You need to create an HTML page in the mapserve directory with four buttons. When the page opens we see a map of topp:states from buckeye.agriculture.purdue.edu/geoserver  . This layer is displayer over Open Street Map background ( so you do not need to mess with a Google key for aerial photos unless you want to.)
