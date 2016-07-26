@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no">
+    <title></title>
+
+    <link rel="stylesheet" href="https://js.arcgis.com/3.16/dijit/themes/claro/claro.css">
+    <link rel="stylesheet" href="https://js.arcgis.com/3.16/esri/css/esri.css" />
+    <link rel="stylesheet" href="css/layout.css"/>
+
+    <script>var dojoConfig = { parseOnLoad: true };</script>
+    <script src="https://js.arcgis.com/3.16/"></script>
+    <script>
+      dojo.require("dijit.layout.BorderContainer");
+      dojo.require("dijit.layout.ContentPane");
+      dojo.require("dijit.layout.TabContainer");
+      dojo.require("esri.map");
+      dojo.require("esri.arcgis.utils");
+      dojo.require("esri.IdentityManager");
+      dojo.require("dojo/dom");
+      dojo.require("esri/Color");
+      dojo.require( "dojo/keys");
+      dojo.require("esri/config");
+      dojo.require("esri/sniff");
+      dojo.require("esri/SnappingManager");
+      dojo.require( "esri/dijit/Measurement");
+      dojo.require( "esri/symbols/SimpleLineSymbol");
+      dojo.require( "esri/symbols/SimpleFillSymbol");
+      //dojo.require();
+      //dojo.require();
+      dojo.require("esri.dijit.Scalebar");
+      dojo.require("dojo/domReady!");
+
+
+
+      var map;
+      var map_2;
+
+      function init() {
+      
+         esri.config.defaults.io.proxyUrl = "/proxy/";
+         //esriConfig.defaults.map.panDuration = 0;  
+      
+        var webmap = "9625fb28b2a2442399bac2979b602762";
+        var webmap_2 = "a861dcdb009b4b8683e49653c0c696ac";
+         esri.config.defaults.geometryService = new esri.tasks.GeometryService("https://utility.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer");
+         esri.config.defaults.io.alwaysUseProxy = false;
+            var initExtent = new esri.geometry.Extent(-74.05, 40.71, -73.95, 40.82, 4326);
+
+        var mapDeferred = esri.arcgis.utils.createMap(webmap, "map", {
+          mapOptions: {
+            slider: "true",
+
+          },
+          geometryServiceURL: "https://tasks.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer",
+
+        });
+        mapDeferred.then(function(response) {
+        //  dojo.byId("title").innerHTML = response.itemInfo.item.title;
+
+
+          map = response.map;
+
+
+          map.setZoom(8);
+          dojo.connect(map,"onExtentChange",changeExtent);
+
+
+          //map.setExtent(-10577475.30 , 5927035.05,  -9283328.23 , 5020998.73);
+          
+          initToolbar(map,"measurementDiv");
+
+        }, function(error) {
+          console.log("Map creation failed: ", dojo.toJson(error));
+        });
+      
+        var mapDeferred_2 = esri.arcgis.utils.createMap(webmap_2, "map_2", {
+          mapOptions: {
+            slider: "true",
+
+          },
+          geometryServiceURL: "https://tasks.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer"
+        });
+
+         mapDeferred_2.then(function(response) {
+        //  dojo.byId("title").innerHTML = response.itemInfo.item.title;
+
+
+          map_2 = response.map;
+          initToolbar(map_2,"measurementDiv_2");
+          dojo.connect(map_2,"onExtentChange",changeExtent);
+
+
+        }, function(error) {
+          console.log("Map creation failed: ", dojo.toJson(error));
+
+        });
+    
+      }
+
+
+
+      function onClick() {
+        //console.log("clicked");
+                 var axtent = new esri.geometry.Extent(105.6673614, 37.0016790, 55.6153456, 5.7191691, map.SpatialReference);  
+        map.setExtent(axtent);  
+      }
+
+
+
+      // THis is where u change the coordiantes eh!
+      function changeExtent(extent1) {
+
+
+          var extent2 = map.extent;
+          if(map_2.extent != extent2) 
+           map_2.setExtent(extent2);
+         // map2.hideZoomSlider(); //sometimes
+      }
+       function changeExtent_2(extent1) {
+          var extent1 = map_2.extent();
+          if(map.extent != extent1) 
+           map.setExtent(extent1);
+         // map2.hideZoomSlider(); //sometimes
+      }
+
+
+
+
+      function initToolbar(mymap,div) {
+        //define a new line symbol and point symbol to use for measure tools
+        var pms = new esri.symbol.PictureMarkerSymbol("images/flag.png",24,24);
+        pms.setOffset(9,11);
+        var sls = new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_DOT,
+            new dojo.Color([255,0,0,0.55]), 4);
+        var measurement = new esri.dijit.Measurement({
+          map: mymap,
+          lineSymbol:sls,
+          pointSymbol:pms
+        }, dojo.byId(div));
+        measurement.startup();
+        measurement.setTool("area",false);
+      }
+
+      //show map on load
+      //dojo.ready(init);
+
+      // Do something once DOM/requires are ready
+      dojo.ready(function() {
+          init();
+          var d = dijit.byId("tabcontainer");
+          dojo.connect(d,"selectChild",function(child){
+            console.log("selected Tab: ", child.id);
+          });
+
+         // var mapExtentChange = map.on("extent-change",changeHandler);
+         // dojo.connect(map,"onPan",onPan);
+
+
+
+      });
+
+      function changeHandler(evt) {
+        console.log("u paneed");
+      }
+      /*
+      function onPan() {
+        alert("hdasdsadasdsadsdasdasdsadasa");
+      }
+      */
+
+
+    
+      
+
+    </script>
+  </head>
+
+  <body class="claro">
+    <div id="mainWindow" data-dojo-type="dijit.layout.BorderContainer" data-dojo-props="design:'headline'"
+     style="width:100%; height:100%;">
+
+     <div style = "height:2%" id="header" data-dojo-type="dijit.layout.ContentPane" data-dojo-props="region:'top'">
+        <button type="button" onclick=onClick()> Click me ! </button>
+      </div>
+
+            
+      <div data-dojo-type="dijit.layout.ContentPane" data-dojo-props="region:'center'">
+        <div id="tabcontainer" data-dojo-type="dijit.layout.TabContainer">
+            <div id="map" data-dojo-type="dijit.layout.ContentPane" data-dojo-props="region:'center',title:'Tab 1'">
+                <div style="position:absolute; right:20px; top:10px; z-Index:999;">
+                    <div data-dojo-type="dijit/TitlePane" data-dojo-props="title:'Measurement', closable:false, open:false">
+                       <div id="measurementDiv"></div>
+                    </div>
+                </div>
+            </div>
+           <div id="map_2" data-dojo-type="dijit.layout.ContentPane" data-dojo-props="region:'center',title:'Tab 2'">
+             <div style="position:absolute; right:20px; top:10px; z-Index:999;">
+                    <div data-dojo-type="dijit/TitlePane" data-dojo-props="title:'Measurement', closable:false, open:false">
+                       <div id="measurementDiv_2"></div>
+                    </div>
+                </div>
+           </div>
+
+           <div id="map_3" data-dojo-type="dijit.layout.ContentPane" data-dojo-props="title:'Tab 3'">
+            Content for the th tab
+          </div>
+
+
+
+
+        </div>
+
+      </div>
+
+
+      
+
+    </div>
+  </body>
+
+</html>

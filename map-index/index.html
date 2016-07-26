@@ -1,0 +1,225 @@
+
+<!DOCTYPE html>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>STEPL WEB - CLIGEN</title>
+    <script src='https://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAjpkAC9ePGem0lIq5XcMiuhR_wWLPFku8Ix9i2SXYRVK3e45q1BQUd_beF8dtzKET_EteAjPdGDwqpQ'></script>
+    <script src="js/ol.js"></script>
+    <script src="js/proj4.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.3.14/proj4.js"></script>
+    <link rel="stylesheet" href="./js/style1.css" type="text/css">
+    <link rel="stylesheet" href="./js/style2.css" type="text/css">
+    <link rel="stylesheet" href="css/ol.css" type="text/css"> 
+    <style type="text/css">
+        html, body {
+            height: 100%;
+        }
+        #map {
+            width:  100%;
+            height: 80%;
+            border: 1px solid black;
+        }
+        .olPopup p { margin:0px; font-size: .9em }
+        .olPopup h2 { font-size:1.2em }
+    </style>
+    <script src="./js/OpenLayers.js"></script>
+    <script type="text/javascript">
+        var lon = 5;
+        var lat = 40;
+        var zoom = 5;
+        var select;
+        var map;
+        var extent;
+        var bbox1;
+        //declared to store bound values
+        var bounds;
+        function init(){
+         var curentState= sessionStorage.getItem("state");
+         var curentCounty = sessionStorage.getItem("county");
+         var input_address = curentState +" "+ curentCounty;
+         if (curentState && curentCounty){
+         	search(input_address);
+         }
+                   var options = {
+                maxExtent: bounds,
+                projection: new OpenLayers.Projection("EPSG:900913"),
+                displayProjection: new OpenLayers.Projection("EPSG:4326")
+            };
+           map = new OpenLayers.Map('map', options);
+            var mapnik = new OpenLayers.Layer.OSM("OpenStreetMap (Mapnik)");
+            var gmap_street = new OpenLayers.Layer.Google("Google Streets", {sphericalMercator:true});
+            var gmap_satellite = new OpenLayers.Layer.Google("Google Satellite", {sphericalMercator:true, type:G_SATELLITE_MAP});
+            var gmap_hybrid = new OpenLayers.Layer.Google("Google Hybrid", {sphericalMercator:true, type:G_HYBRID_MAP});
+            var sundials = new OpenLayers.Layer.Vector("Climate Stations", {
+		visibility: true,					// YSYS
+        projection: map.displayProjection,
+        strategies: [new OpenLayers.Strategy.Fixed()],
+        protocol: new OpenLayers.Protocol.HTTP({
+          url: "./loc.kml",
+          format: new OpenLayers.Format.KML({
+            extractStyles: true,
+            extractAttributes: true
+        })
+      })
+    });
+
+	    //map.addLayers([gmap_street, gmap_satellite, gmap_hybrid, mapnik, sundials]);
+	    map.addLayers([mapnik, sundials]);
+        select = new OpenLayers.Control.SelectFeature(sundials);
+        sundials.events.on({
+            "featureselected": onFeatureSelect,
+            "featureunselected": onFeatureUnselect
+        });
+        
+        map.addControl(select);
+        select.activate();   
+
+        map.addControl(new OpenLayers.Control.LayerSwitcher());
+        map.zoomToExtent(
+            //extent
+                new OpenLayers.Bounds(-126.035156,24.527135,-62.578125,50.401515).transform(map.displayProjection, map.projection)	// YSYS
+          // new OpenLayers.Bounds(bbox1[1],bbox1[2],bbox1[3],bbox1[0]).transform("EPSG:4326", "EPSG:900913")
+               );
+        
+      
+
+    }
+    function onPopupClose(evt) {
+        select.unselectAll();
+    }
+    function onFeatureSelect(event) {
+        var feature = event.feature;
+        var selectedFeature = feature;
+            // extendData[14]: County;
+            // extendData[8]: State;
+            var extendData = [];
+            var i = 0;
+            for (attributeName in feature.attributes) {
+                extendData[i++] = feature.attributes[attributeName].value;
+            }
+            var popup = new OpenLayers.Popup.FramedCloud("chicken", 
+                feature.geometry.getBounds().getCenterLonLat(),
+                new OpenLayers.Size(10,10),
+                "<div style=\"color:black;background:white;\"><b>" 				//YSYS
+                + "Station: " + extendData[2] + "<br>" + "County: " +  extendData[14] + "<br><br>"
+                + "<input type=button value='Select' onClick='javascript:cgiRun()'>"
+                + "</b></div>",
+                null, true, onPopupClose
+                );
+
+	    //YSYS
+	    var myStDsc = extendData[2] ;
+        //var myStNam = feature.attributes.name;
+        top.opener.document.inputMain.LocName.value = myStDsc ;
+        
+        // Pass selected county to Step 4
+        var state = extendData[8];
+        var countyName = extendData[14];
+        top.opener.document.inputMain.State.value = state;
+        top.opener.document.inputMain.CountyName.value = countyName;
+        // End of changes
+
+        document.main.FileName.value = feature.attributes.name ; 
+        document.main.ystime.value = top.opener.document.inputMain.ystime.value ;
+        document.main.countyN.value = countyName;
+        document.main.stateN.value = state;
+        document.main.stationN.value = myStDsc;
+
+        feature.popup = popup;
+        map.addPopup(popup);
+    }
+
+    function onFeatureUnselect(event) {
+        var feature = event.feature;
+        if(feature.popup) {
+            map.removePopup(feature.popup);
+            feature.popup.destroy();
+            delete feature.popup;
+        }
+    }
+	function cgiRun() {					// YSYS
+      //top.opener.updateCounty();
+      document.main.submit() ;
+  }
+  //add all the functions needed to zoom to the selected location
+
+   function setProjection(code, name, proj4def, bbox) {
+       // resultSpan.innerHTML = '(' + code + ') ' + name;
+        var newProjCode = 'EPSG:' + code;
+        proj4.defs(newProjCode, proj4def);
+        var newProj = ol.proj.get(newProjCode);
+        var fromLonLat = ol.proj.getTransform('EPSG:4326', newProj);
+
+        // very approximate calculation of projection extent
+        extent = ol.extent.applyTransform(
+            [bbox[1], bbox[2], bbox[3], bbox[0]], fromLonLat);
+        newProj.setExtent(extent);
+        var newView = new ol.View({
+          projection: newProj
+        });
+       
+       // map.setCenter((new OpenLayers.LonLat(bbox[1],bbox[0])), 2);
+        var size = map.getSize();
+        if (size) {
+          newView.fit(extent, size);
+        }
+      }
+  function search(query) {
+        
+        fetch('https://epsg.io/?format=json&q=' + query).then(function(response) {
+          return response.json();
+        }).then(function(json) {
+          var results = json['results'];
+          if (results && results.length > 0) {
+            for (var i = 0, ii = results.length; i < ii; i++) {
+              var result = results[i];
+              if (result) {
+                bbox1 = result['bbox'];
+                //alert(bbox1);
+                map.zoomToExtent(
+            //extent
+                  
+          new OpenLayers.Bounds(bbox1[1],bbox1[2],bbox1[3],bbox1[0]).transform("EPSG:4326", "EPSG:900913")
+               );
+                var code = result['code'], name = result['name'],
+                    proj4def = result['proj4'], bbox = result['bbox'];
+                if (code && code.length > 0 && proj4def && proj4def.length > 0 &&
+                    bbox && bbox.length == 4) {
+                  setProjection(code, name, proj4def, bbox);
+                  return;
+                }
+              }
+            }
+          }
+          setProjection(null, null, null, null);
+        });
+      }
+
+</script>
+</head>
+<body onload="init()">
+  <h1 id="title">Climate Stations for CLIGEN</h1>
+  <div id="tags">
+    osm, kml, spherical, mercator, reprojection, feature, popup, advanced
+</div>
+<p id="shortdesc">
+    Find the climate station you're interested in, and then turn on the "Climate Stations" layer.
+</p>
+<div id="map" class="smallmap"></div>
+<div id="docs"></div>
+
+<form name=main method="POST" action="./runCLIGEN.cgi">
+    <input type=hidden name=FileName>
+    <input type=hidden name=ystime>
+    <input type=hidden name=stationN>
+    <input type=hidden name=stateN>
+    <input type=hidden name=countyN>
+</form>
+
+
+</body>
+</html>

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no">
+    <title>Create web map from id</title>
+
+    <link rel="stylesheet" href="https://js.arcgis.com/3.16/dijit/themes/claro/claro.css">
+    <link rel="stylesheet" href="https://js.arcgis.com/3.16/esri/css/esri.css">
+    <link rel="stylesheet" href="css/layout.css">
+
+    <script src="https://js.arcgis.com/3.16/"></script>
+    <script>
+          dojo.require("dijit.layout.TabContainer");
+          dojo.require( "esri/dijit/Measurement");
+          dojo.require( "esri/symbols/SimpleLineSymbol");
+          dojo.require( "esri/symbols/SimpleFillSymbol");
+      require([
+        "dojo/parser",
+        "dojo/ready",
+        "dijit/layout/BorderContainer",
+        "dijit/layout/ContentPane",
+        "dojo/dom",
+        "esri/map", 
+        "esri/urlUtils",
+        "esri/arcgis/utils",
+        "esri/dijit/Legend",
+        "esri/dijit/Scalebar",
+        "dojo/domReady!"
+      ], function(
+        parser,
+        ready,
+        BorderContainer,
+        ContentPane,
+        dom,
+        Map,
+        urlUtils,
+        arcgisUtils,
+        Legend,
+        Scalebar
+      ) {
+        ready(function(){
+
+
+        parser.parse();
+
+//if accessing webmap from a portal outside of ArcGIS Online, uncomment and replace path with portal URL
+       //arcgisUtils.arcgisUrl = "https://pathto/portal/sharing/content/items";
+        arcgisUtils.createMap("9625fb28b2a2442399bac2979b602762","map").then(function(response){
+          //update the app 
+         // dom.byId("title").innerHTML = response.itemInfo.item.title;
+          //dom.byId("subtitle").innerHTML = response.itemInfo.item.snippet;
+
+          var map = response.map;
+
+
+
+          //add the scalebar 
+          var scalebar = new Scalebar({
+            map: map,
+            scalebarUnit: "english"
+          });
+
+          initToolbar(map,"measurementDiv");
+
+
+
+
+
+        });
+
+        //map 2
+         arcgisUtils.createMap("a861dcdb009b4b8683e49653c0c696ac","map_2").then(function(response){
+          //update the app 
+      //    dom.byId("title").innerHTML = response.itemInfo.item.title;
+       //   dom.byId("subtitle").innerHTML = response.itemInfo.item.snippet;
+
+          var map_2 = response.map;
+
+
+
+          //add the scalebar 
+          var scalebar = new Scalebar({
+            map: map_2,
+            scalebarUnit: "english"
+          });
+
+        initToolbar(map_2,"measurementDiv_2");
+        });
+
+
+
+       function initToolbar(mymap,div) {
+        //define a new line symbol and point symbol to use for measure tools
+        var pms = new esri.symbol.PictureMarkerSymbol("images/flag.png",24,24);
+        pms.setOffset(9,11);
+        var sls = new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_DOT,
+            new dojo.Color([255,0,0,0.55]), 4);
+        var measurement = new esri.dijit.Measurement({
+          map: mymap,
+          lineSymbol:sls,
+          pointSymbol:pms
+        }, dojo.byId(div));
+        measurement.startup();
+        measurement.setTool("area",true);
+      }
+
+
+
+        });
+
+      });
+    </script>
+  </head>
+
+ 
+  <body class="claro">
+    <div id="mainWindow" data-dojo-type="dijit.layout.BorderContainer" data-dojo-props="design:'headline'"
+     style="width:100%; height:100%;">
+
+     <div style = "height:2%" id="header" data-dojo-type="dijit.layout.ContentPane" data-dojo-props="region:'top'">
+        <div id="title"> HEY!
+        </div>
+      </div>
+
+            
+      <div data-dojo-type="dijit.layout.ContentPane" data-dojo-props="region:'center'">
+        <div id="tabcontainer" data-dojo-type="dijit.layout.TabContainer">
+            <div id="map" data-dojo-type="dijit.layout.ContentPane" data-dojo-props="region:'center',title:'Tab 1'">
+                <div style="position:absolute; right:20px; top:10px; z-Index:999;">
+                    <div data-dojo-type="dijit/TitlePane" data-dojo-props="title:'Measurement', closable:false, open:false">
+                       <div id="measurementDiv"></div>
+                    </div>
+                </div>
+            </div>
+           <div id="map_2" data-dojo-type="dijit.layout.ContentPane" data-dojo-props="region:'center',title:'Tab 2'">
+             <div style="position:absolute; right:20px; top:10px; z-Index:999;">
+                    <div data-dojo-type="dijit/TitlePane" data-dojo-props="title:'Measurement', closable:false, open:false">
+                       <div id="measurementDiv_2"></div>
+                    </div>
+                </div>
+           </div>
+
+           <div id="map_3" data-dojo-type="dijit.layout.ContentPane" data-dojo-props="title:'Tab 3'">
+            Content for the th tab
+          </div>
+
+
+
+
+        </div>
+
+      </div>
+
+
+      
+
+    </div>
+  </body>
+
+</html>

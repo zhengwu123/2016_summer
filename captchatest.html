@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="css/jquery.realperson.css"> 
+  <script type="text/javascript" src="js/jquery.plugin.js"></script> 
+  <script type="text/javascript" src="js/jquery.realperson.js"></script>
+</head>
+<body>
+
+<div class="container">
+  <h2>Forget Password</h2>
+  <form action="forget.php"role="form" method="post">
+    <div class="form-group">
+      <label for="email">Email:</label>
+      <input type="email" class="form-control" id="email" name="email" placeholder="Enter email to receive your password." required>
+      <br>
+      <input type="text" id="captcha" required>
+    </div>
+    <button type="submit" class="btn btn-success" name="submit">Submit</button>
+  </form>
+  
+</div>
+<script type="text/javascript">
+  
+  $('#captcha').realperson({chars: $.realperson.alphanumeric});
+</script>
+</body>
+</html>
