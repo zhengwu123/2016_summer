@@ -1,0 +1,61 @@
+
+h1{
+	color: white;
+	text-align: center;
+	font-size: 40pt;
+}
+#menu{
+	transition: all 0.3s ease;
+	position: fixed;
+	width: 0%;
+	top: 0;
+	left: -200px;
+	background: rgba(0, 100, 100,0.88);
+	height: 100%;
+	z-index: 999;
+	box-shadow: 0px 0px 10px black;
+}
+
+#menu a{
+	color: white;
+	display: block;
+	text-align: center;
+	text-decoration: none;
+	padding: 10px 10px 10px 10px;
+	margin: 10px 10px 10px 10px;
+	border-radius: 100px;
+	transition: all 0.2s ease;
+}
+
+#menu a:hover{
+	background: rgb(50, 50, 50);
+}
+
+#menu-toggle{
+	position: fixed;
+	top: 80px;
+	left: 0;
+	background: rgba(0, 100, 100,0.85);
+	z-index: 1000;
+	padding-left: 10px;
+	padding-top: 10px;
+	padding-bottom: 10px;
+	padding-right: 10px;
+	border-top-right-radius: 5px;
+	border-bottom-right-radius: 5px;
+	transition: all 0.3s ease;
+}
+
+#menu-toggle:hover{
+	cursor: pointer;
+}
+
+#menu.open{
+	left: 0;
+	width: 200px;
+	display: block;
+}
+
+#menu-toggle.open{
+	left: 200px;
+}

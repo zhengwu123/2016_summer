@@ -1,0 +1,32 @@
+#clientsDropDown {
+  position:absolute;
+  bottom:0;
+  width: 100%;
+  padding-bottom:1%;
+  z-index: 100;
+}
+#clientsOpen {
+  background: rgba(0, 100, 100,0.75);
+  color: #ececec;
+  cursor: pointer;
+  float: left;
+  font-size: 1.5em;
+  margin: -2px 0 0 195px;
+  padding: 0px 2px 0px 2px;
+  text-decoration: none;
+  width: 53px;
+border-radius: 5px;
+}
+#clientsCTA {
+  background:rgba(250, 250, 250,0.85);
+  color: rgba(0, 0, 0,0.75);
+  text-align:center;
+  margin: -2px 37px 0 195px;
+  padding: 30px 0;
+  text-decoration: none;
+    border-radius: 15px;
+}
+
+#clientsDropDown #clientsDashboard {
+  display: none;
+}
